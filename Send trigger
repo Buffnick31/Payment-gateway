@@ -1,0 +1,58 @@
+// Import the xrpl library
+import xrpl from 'xrpl';
+
+// Add an event listener to the form submission
+document.getElementById("paymentForm").addEventListener("submit", async function(event) {
+  event.preventDefault(); // Prevent form from refreshing the page
+
+  // Get form data
+  const amount = document.getElementById("amount").value;
+  const destination = document.getElementById("address").value;
+
+  // Your sender wallet's seed (use the wallet generated in previous steps)
+  const senderSeed = 'sEXAMPLEWALLETSEED'; // Replace this with your actual seed
+
+  try {
+    // Connect to the XRP Ledger Testnet
+    const client = new xrpl.Client('wss://s.altnet.rippletest.net:51233');
+    await client.connect();
+    console.log("Connected to the XRP Ledger Testnet");
+
+    // Create wallet from seed
+    const senderWallet = xrpl.Wallet.fromSeed(senderSeed);
+
+    // Prepare the payment transaction
+    const paymentTx = {
+      "TransactionType": "Payment",
+      "Account": senderWallet.classicAddress, // Sender's wallet address
+      "Amount": xrpl.xrpToDrops(amount), // Amount converted to drops (1 XRP = 1,000,000 drops)
+      "Destination": destination // Recipient address
+    };
+
+    // Automatically fill in additional transaction fields (like Fee and Sequence)
+    const prepared = await client.autofill(paymentTx);
+    console.log("Payment Transaction Prepared:", prepared);
+
+    // Sign the transaction with the sender's wallet
+    const signed = senderWallet.sign(prepared);
+    console.log("Transaction Signed:", signed);
+
+    // Submit the signed transaction to the XRP Ledger
+    const result = await client.submitAndWait(signed.tx_blob);
+
+    // Check the result of the transaction
+    console.log("Transaction Result:", result);
+    if (result.result.meta.TransactionResult === "tesSUCCESS") {
+      alert("Payment sent successfully!");
+    } else {
+      alert("Payment failed. Reason: " + result.result.meta.TransactionResult);
+    }
+
+    // Disconnect from the XRP Ledger
+    await client.disconnect();
+
+  } catch (error) {
+    console.error("Error sending payment:", error);
+    alert("Error occurred while sending payment. Check the console for details.");
+  }
+});
