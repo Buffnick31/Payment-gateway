@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>XRP Payment Gateway</title>
+</head>
+<body>
+  <h1>Send XRP Payment</h1>
+  <form id="paymentForm">
+    <label for="amount">Amount (XRP):</label>
+    <input type="text" id="amount" name="amount"><br><br>
+    <label for="address">Recipient Address:</label>
+    <input type="text" id="address" name="address"><br><br>
+    <button type="submit">Send Payment</button>
+  </form>
+
+  <script src="xrpl.js"></script>
+  <script src="payment.js"></script>
+</body>
+</html>
